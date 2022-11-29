@@ -1,5 +1,7 @@
 export interface Env {}
 
+const CORS_WORKER_URL = 'https://cors-worker.phyzess.workers.dev'
+
 // Cloudflare supports the GET, POST, HEAD, and OPTIONS methods from any origin,
 // and allow any header on requests. These headers must be present
 // on all responses to all CORS preflight requests. In practice, this means
@@ -16,8 +18,6 @@ const API_URL = 'https://examples.cloudflareworkers.com/demos/demoapi';
 
 // The endpoint you want the CORS reverse proxy to be on
 const PROXY_ENDPOINT = '/corsproxy/';
-let href = "${PROXY_ENDPOINT}?apiurl=${API_URL}"
-
 
 async function handleRequest(request: Request) {
   const url = new URL(request.url);
@@ -31,10 +31,11 @@ async function handleRequest(request: Request) {
   // so you can add the correct Origin header to make the API server think
   // that this request is not cross-site.
   request = new Request(apiUrl, request);
+
   request.headers.set('Origin', new URL(apiUrl).origin);
 
   let response = await fetch(request);
-
+  
   // Recreate the response so you can modify the headers
   response = new Response(response.body, response);
 
@@ -105,7 +106,7 @@ export default {
   } else {
     return new Response(null, {
       status: 400,
-      statusText: 'Request with wrong url',
+      statusText: `Request url should be like: "${CORS_WORKER_URL}${PROXY_ENDPOINT}?apiurl={your target url}"`,
     })
   }
 	},
